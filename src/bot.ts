@@ -56,5 +56,13 @@ if (process.env.NODE_ENV === "DEVELOPMENT") {
 	const app = express();
 	app.use(express.json());
 	app.use(`/${bot.token}`, webhookCallback(bot, "express"));
+
+	app.get("/", (req, res) => {
+		res.json({
+			status: "OK",
+			message: "Bot server is running",
+		});
+	});
+
 	app.listen(port, () => console.log(`listening on port ${port}`));
 }
