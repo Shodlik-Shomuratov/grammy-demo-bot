@@ -4,6 +4,7 @@ import config from "./config/config";
 import { MyContext, setupSession } from "./session/session";
 import { instaRequest } from "./axios/instagram";
 import { startConversation } from "./conversations/start.conversation";
+import express from "express";
 
 if (!config.BOT_TOKEN) {
 	throw new Error("BOT_TOKEN is unset");
@@ -43,10 +44,17 @@ bot.on("message::url", async (ctx) => {
 bot.catch((error) => {
 	console.error(error?.message);
 });
-// bot.start({
-// 	onStart(botInfo) {
-// 		console.log("Started");
-// 	},
-// });
 
-export default webhookCallback(bot, "http");
+if (process.env.NODE_ENV === "DEVELOPMENT") {
+	bot.start({
+		onStart(botInfo) {
+			console.log("Started");
+		},
+	});
+} else {
+	const port = process.env.PORT || 3000;
+	const app = express();
+	app.use(express.json());
+	app.use(`/${bot.token}`, webhookCallback(bot, "express"));
+	app.listen(port, () => console.log(`listening on port ${port}`));
+}
